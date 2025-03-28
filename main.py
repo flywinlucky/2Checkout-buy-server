@@ -5,7 +5,7 @@ import json
 app = Flask(__name__)
 
 # Configurare 2Checkout
-API_KEY = "YOUR_2CHECKOUT_API_KEY"  # Înlocuiește cu cheia ta API reală
+API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"  # Cheia ta API reală
 SELLER_ID = "255465911997"
 API_URL = "https://api.2checkout.com/rest/6.0/sales/"
 
