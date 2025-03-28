@@ -1,23 +1,20 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Importă CORS pentru a permite cereri din alte domenii
 import requests
 import json
 import logging
 
 app = Flask(__name__)
 
-# Permite cereri CORS
-CORS(app, resources={r"/*": {"origins": "*"}})
-
 # Configurare loguri
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)  # Poți schimba nivelul de logare, cum ar fi INFO, DEBUG, ERROR, etc.
 logger = logging.getLogger(__name__)
 
 # Configurare 2Checkout
-API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"
+API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"  # Cheia ta API reală
 SELLER_ID = "255465911997"
 API_URL = "https://api.2checkout.com/rest/6.0/sales/"
 
+# Ruta principală (pentru a afișa mesajul "Project is live")
 @app.route('/')
 def home():
     return """
@@ -34,7 +31,7 @@ def home():
 def process_payment():
     try:
         data = request.get_json()
-        logger.info(f"Request received: {data}")
+        logger.info(f"Request received: {data}")  # Logăm datele primite
 
         token = data.get('token')
         name = data.get('name')
@@ -59,7 +56,7 @@ def process_payment():
                 "Name": name
             },
             "Items": [{
-                "Code": "YZC2TXJIDS",  # Codul produsului tău
+                "Code": "YZC2TXJIDS",  # Codul produsului tău, asigură-te că acest cod există pe 2Checkout
                 "Quantity": 1,
                 "Price": {
                     "Amount": 20.00,
@@ -79,6 +76,10 @@ def process_payment():
 
         logger.info("Sending request to 2Checkout API.")
         response = requests.post(API_URL, headers=headers, json=payload)
+
+        # Logare detaliată pentru debugging
+        logger.info(f"Response status code: {response.status_code}")
+        logger.info(f"Response text: {response.text}")
 
         if response.status_code == 201:
             logger.info(f"Payment processed successfully: {response.json()}")
