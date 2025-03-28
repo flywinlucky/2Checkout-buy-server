@@ -1,24 +1,22 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Importă CORS
+from flask_cors import CORS
 import requests
-import json
 import logging
 
 app = Flask(__name__)
 
-# Permite CORS pentru domeniul specificat
+# Permite accesul din frontend
 CORS(app, resources={r"/*": {"origins": "https://gifthouse.pro"}})
 
 # Configurare loguri
-logging.basicConfig(level=logging.DEBUG)  # Poți schimba nivelul de logare, cum ar fi INFO, DEBUG, ERROR, etc.
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Configurare 2Checkout
-API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"  # Cheia ta API reală
+API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"
 SELLER_ID = "255465911997"
-API_URL = "https://api.2checkout.com/rest/6.0/orders/"  # Endpoint corect pentru crearea comenzilor
+API_URL = "https://api.2checkout.com/rest/6.0/orders/"  # API-ul corect pentru comenzi
 
-# Ruta principală (pentru a afișa mesajul "Project is live")
 @app.route('/')
 def home():
     return """
@@ -30,47 +28,49 @@ def home():
     </html>
     """
 
-# Endpoint pentru procesarea plății
 @app.route('/process_payment', methods=['POST'])
 def process_payment():
     try:
         data = request.get_json()
-        logger.info(f"Request received: {data}")  # Logăm datele primite
+        logger.info(f"Request received: {data}")
 
         token = data.get('token')
         name = data.get('name')
         email = data.get('email')
+        game_code = data.get('gameCode')  # Codul jocului selectat
 
-        if not token or not name or not email:
+        if not token or not name or not email or not game_code:
             logger.warning("Missing required fields in the request.")
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Configurăm cererea către 2Checkout API
         headers = {
             "X-Avangate-Authentication": f"code='{SELLER_ID}' date='{request.headers.get('Date', '')}' key='{API_KEY}'",
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
 
-        # Construim payload-ul conform cu `orders/`
         payload = {
-            "Currency": "USD",
-            "Customer": {
-                "FirstName": name.split()[0] if " " in name else name,  # Separă numele în FirstName / LastName
-                "LastName": name.split()[1] if " " in name else "N/A",
-                "Email": email
+            "sellerId": SELLER_ID,
+            "currency": "USD",
+            "CustomerDetails": {
+                "Email": email,
+                "Name": name
             },
-            "Items": [
-                {
-                    "Code": "YZC2TXJIDS",  # ID-ul produsului tău
-                    "Quantity": 1
+            "Items": [{
+                "Code": game_code,  # Codul produsului selectat de utilizator
+                "Quantity": 1,
+                "Price": {
+                    "Amount": 20.00,
+                    "Type": "CUSTOM"
                 }
-            ],
+            }],
             "PaymentDetails": {
-                "Type": "EES_TOKEN_PAYMENT",
+                "Type": "CC",
                 "Currency": "USD",
                 "PaymentMethod": {
-                    "EesToken": token
+                    "CardNumberToken": token,
+                    "Vendor3DSReturnURL": "https://gifthouse.pro/success",
+                    "Vendor3DSCancelURL": "https://gifthouse.pro/cancel"
                 }
             }
         }
