@@ -1,7 +1,7 @@
-import logging
 from flask import Flask, request, jsonify
 import requests
 import json
+import logging
 
 app = Flask(__name__)
 
@@ -13,6 +13,18 @@ logger = logging.getLogger(__name__)
 API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"  # Cheia ta API reală
 SELLER_ID = "255465911997"
 API_URL = "https://api.2checkout.com/rest/6.0/sales/"
+
+# Ruta principală (pentru a afișa mesajul "Project is live")
+@app.route('/')
+def home():
+    return """
+    <html>
+        <body>
+            <h1>Project is live</h1>
+            <p>The server is up and running!</p>
+        </body>
+    </html>
+    """
 
 # Endpoint pentru procesarea plății
 @app.route('/process_payment', methods=['POST'])
