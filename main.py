@@ -1,9 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Importă CORS
 import requests
 import json
 import logging
 
 app = Flask(__name__)
+
+# Permite CORS pentru domeniul specificat
+CORS(app, resources={r"/*": {"origins": "https://gifthouse.pro"}})
 
 # Configurare loguri
 logging.basicConfig(level=logging.DEBUG)  # Poți schimba nivelul de logare, cum ar fi INFO, DEBUG, ERROR, etc.
@@ -56,7 +60,7 @@ def process_payment():
                 "Name": name
             },
             "Items": [{
-                "Code": "YZC2TXJIDS",  # Codul produsului tău, asigură-te că acest cod există pe 2Checkout
+                "Code": "YZC2TXJIDS",  # Codul produsului tău
                 "Quantity": 1,
                 "Price": {
                     "Amount": 20.00,
@@ -76,10 +80,6 @@ def process_payment():
 
         logger.info("Sending request to 2Checkout API.")
         response = requests.post(API_URL, headers=headers, json=payload)
-
-        # Logare detaliată pentru debugging
-        logger.info(f"Response status code: {response.status_code}")
-        logger.info(f"Response text: {response.text}")
 
         if response.status_code == 201:
             logger.info(f"Payment processed successfully: {response.json()}")
