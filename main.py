@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Configurare 2Checkout
 API_KEY = "78F49C72-A686-4BC6-BD59-90937CDB8322"  # Cheia ta API reală
 SELLER_ID = "255465911997"
-API_URL = "https://api.2checkout.com/rest/6.0/sales/"
+API_URL = "https://api.2checkout.com/rest/6.0/orders/"  # Endpoint corect pentru crearea comenzilor
 
 # Ruta principală (pentru a afișa mesajul "Project is live")
 @app.route('/')
@@ -52,28 +52,25 @@ def process_payment():
             "Accept": "application/json"
         }
 
+        # Construim payload-ul conform cu `orders/`
         payload = {
-            "sellerId": SELLER_ID,
-            "currency": "USD",
-            "CustomerDetails": {
-                "Email": email,
-                "Name": name
+            "Currency": "USD",
+            "Customer": {
+                "FirstName": name.split()[0] if " " in name else name,  # Separă numele în FirstName / LastName
+                "LastName": name.split()[1] if " " in name else "N/A",
+                "Email": email
             },
-            "Items": [{
-                "Code": "YZC2TXJIDS",  # Codul produsului tău
-                "Quantity": 1,
-                "Price": {
-                    "Amount": 20.00,
-                    "Type": "CUSTOM"
+            "Items": [
+                {
+                    "Code": "YZC2TXJIDS",  # ID-ul produsului tău
+                    "Quantity": 1
                 }
-            }],
+            ],
             "PaymentDetails": {
-                "Type": "CC",
+                "Type": "EES_TOKEN_PAYMENT",
                 "Currency": "USD",
                 "PaymentMethod": {
-                    "CardNumberToken": token,
-                    "Vendor3DSReturnURL": "https://yourdomain.com/success",
-                    "Vendor3DSCancelURL": "https://yourdomain.com/cancel"
+                    "EesToken": token
                 }
             }
         }
