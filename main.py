@@ -20,8 +20,8 @@ def home():
     return """
     <html>
         <body>
-            <h1>Project is live</h1>
-            <p>The server is up and running!</p>
+            <h1>Project is live 🟢</h1>
+            <p>Welcome to the 2Checkout payment processing demo.</p>
         </body>
     </html>
     """
